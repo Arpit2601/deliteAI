@@ -7,54 +7,24 @@ on:
 jobs:
   build:
     if: github.event.review.state == 'approved'
-    name: Run unit test on pull request
+    name: Run coreruntime unit tests on pull request
     timeout-minutes: 30
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        ref: ${{github.ref}}
 
-    - name: Setup CMake
-      uses: lukka/get-cmake@latest
-      with:
-        cmakeVersion: '3.18.x'
-        useLocalCache: true
-
-    - name: Setup python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
-
-    - name: Setup libstdc++, zlib, curl
-      run: |
-        sudo apt-get update
-        sudo apt-get install libstdc++6
-        sudo ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/libstdc++.so
-        sudo apt-get install zlib1g-dev
-        sudo apt-get install libstdc++-12-dev
-        sudo apt-get install libcurl4-openssl-dev
-        sudo apt-get install curl
-        sudo ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4 /usr/lib/libcurl.so
-        sudo apt install -y docker-ce docker-ce-cli
+    - name: Setup test environment
+      uses: ./.github/actions/setup-test-env
 
     - name: Install Gtest
       run: sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp lib/*.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
 
-    - name: Install pre-requisites and setup docker
-      run: |
-        ./setup.sh --sdk python
-        python3 coreruntime/tests/utils/download_from_s3.py --default_bucket deliteai --prefix build-dependencies/llama-3.2-1B/onnx --output mockserver/mockserver_assets/llama-3 --archive_output True
-        cd mockserver
-        docker compose up --build -d
-        cd ../coreruntime
-        python3.12 -m pip install -r requirements.txt
+    - name: Build nimbletest
+      working-directory: coreruntime
+      run: python3 build.py --testing
 
     - name: Run nimbletest
-      run: |
-        cd coreruntime
-        python3.12 build.py --testing
-        cd build
-        ./nimbletest
+      working-directory: coreruntime/build
+      run: ./nimbletest
