@@ -37,6 +37,7 @@ runs:
         python3 coreruntime/tests/utils/download_from_s3.py --default_bucket deliteai --prefix build-dependencies/llama-3.2-1B/onnx --output mockserver/mockserver_assets/llama-3 --archive_output True
 
     - name: Setup external libs
+      shell: bash
       run: ./setup.sh --sdk python
 
     - name: Start mock server
