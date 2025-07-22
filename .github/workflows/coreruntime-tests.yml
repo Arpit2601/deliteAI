@@ -1,4 +1,4 @@
-name: Run CoreRuntime Tests
+name: Run coreruntime tests
 
 on:
   pull_request_review:
@@ -23,7 +23,7 @@ jobs:
 
     - name: Build nimbletest
       working-directory: coreruntime
-      run: python3 build.py --testing
+      run: ./build.py --testing
 
     - name: Run nimbletest
       working-directory: coreruntime/build

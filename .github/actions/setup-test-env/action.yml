@@ -1,7 +1,7 @@
-name: 'Setup Environment'
-description: 'Sets up the environment for testing'
+name: Setup test environment
+description: Sets up the environment for testing
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Setup CMake
       uses: lukka/get-cmake@latest
@@ -21,16 +21,16 @@ runs:
         sudo apt-get install curl
         sudo ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4 /usr/lib/libcurl.so
 
-    - name: Setup python
+    - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: 3.12
 
-    - name: Install python dependencies
+    - name: Install Python dependencies
+      working-directory: coreruntime
       shell: bash
-      working-directory: coreruntime 
       run: python3 -m pip install -r requirements.txt
-        
+
     - name: Install pre-requisites for mock server
       shell: bash
       run: |
@@ -41,6 +41,6 @@ runs:
       run: ./setup.sh --sdk python
 
     - name: Start mock server
-      shell: bash
       working-directory: mockserver
+      shell: bash
       run: docker compose up --build -d
